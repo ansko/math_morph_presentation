@@ -1,0 +1,301 @@
+\documentclass[10pt]{beamer}
+
+
+\newcommand{\scaledimg}[2]{
+    \includegraphics[height=#1\textheight,keepaspectratio]{#2}
+}
+
+
+%\newenvironment{correct}%
+%{\noindent\ignorespaces}%
+%{\par\noindent%
+%\ignorespacesafterend}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[T1,T2A]{fontenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+
+\begin{document}
+
+
+\graphicspath{{./img/}}
+
+
+\begin{frame}\frametitle{Бинарная математическая морфология}
+\Large
+Метод обработки растровых изображений, успешный благодаря строгой 
+математической основе (теория множеств).
+\normalsize
+\end{frame}
+
+
+\begin{frame}\frametitle{Бинарная математическая морфология}
+Входные данные:
+\begin{itemize}
+    \item[] \textbf{B} -- входное бинарное изображение \\
+            \scaledimg{0.2}{contacting.png}
+            \scaledimg{0.2}{original.png}
+            \scaledimg{0.2}{borders_init.png}
+    \item[] \textbf{S} -- струтурирующий элемент \\
+            \begin{figure}[H]
+            \begin{tabular}{p{0.15\linewidth}p{0.15\linewidth}p{0.15\linewidth}
+                            p{0.2\linewidth}p{0.15\linewidth}}
+                \scaledimg{0.1}{structural_disk_7.png}
+                    \captionsetup{labelformat=empty}
+                    \caption{Disk(7)} &
+                \scaledimg{0.1}{structural_ring_7.png}
+                    \captionsetup{labelformat=empty}
+                    \caption{Ring(7)} &
+                \scaledimg{0.1}{structural_box_10_10.png}
+                    \captionsetup{labelformat=empty}
+                    \caption{Box(10,10)} &
+                \scaledimg{0.1}{structural_box_20_10.png}
+                    \captionsetup{labelformat=empty}
+                    \caption{Box(20,10)} &
+                \scaledimg{0.1}{borders_el_3.png}
+            \end{tabular}
+            \end{figure}
+\end{itemize}
+Результат:
+\begin{itemize}
+    \item[] \textbf{B'} -- выходное бинарное изображение \\
+            \scaledimg{0.2}{contact_removed.png}
+            \scaledimg{0.2}{original_erosed_clean.png}
+            \scaledimg{0.2}{original_dilated_clean.png}
+            \scaledimg{0.2}{borders_found_31.png}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}\frametitle{Базовые операции математической морфологии}
+Определение операций:
+\begin{itemize}
+\item[-] дилатация, или наращивание (dilation)
+         $$ B \oplus S = \{ x + s | x \in X \wedge s \in S \} $$
+\item[-] эрозия (erosion)
+         $$ B \ominus S = \{ b | \forall s \in S, b + s \in B \} $$
+\end{itemize}
+На примере применения операции к одному пикселу изображения с использованием 
+одного и того же структурирующего элемента (Box(3,3)):
+\begin{tabular}{ p{0.2\linewidth}p{0.08\linewidth}p{0.2\linewidth}
+                 p{0.15\linewidth}p{0.2\linewidth} }
+    \begin{tabular}{l} \scaledimg{0.2}{def_original_erosed.png} \end{tabular} &
+    \begin{tabular}{c} $\leftarrow$ \\ эрозия \end{tabular} &
+    \begin{tabular}{l} \scaledimg{0.2}{def_original_and_element.png} \end{tabular} &
+    \begin{tabular}{c} $\rightarrow$ \\ дилатация \end{tabular} &
+    \begin{tabular}{l} \scaledimg{0.2}{def_original_dilated.png} \end{tabular}
+\end{tabular}
+\end{frame}
+
+
+\begin{frame}\frametitle{Применение операций к изображению}
+Для применения операции ко всему изображению происходит перемещение 
+структурирующего элемента по пикселам с применением операции к каждому пикселу.
+\begin{tabular}{p{0.0125\linewidth}p{0.3\linewidth}p{0.0125\linewidth}
+                p{0.1\linewidth}p{0.0125\linewidth}}
+    \begin{tabular}{c} B= \end{tabular} &
+    \begin{tabular}{l} \scaledimg{0.2}{original.png} \end{tabular} &
+    \begin{tabular}{c} S= \end{tabular} &
+    \begin{tabular}{l} \scaledimg{0.1}{box_3x3.png} \end{tabular} &
+    \begin{tabular}{c} Box(3,3) \end{tabular}
+\end{tabular}
+\begin{tabular}{ll}
+    \begin{tabular}{l} Дилатация \end{tabular} &
+    \begin{tabular}{l} Эрозия \end{tabular} \\
+    \begin{tabular}{l} \scaledimg{0.33}{original_dilated.png} \end{tabular} &
+    \begin{tabular}{l} \scaledimg{0.33}{original_erosed.png} \end{tabular} \\
+\end{tabular}
+\end{frame}
+
+
+\begin{frame}\frametitle{Производные операции}
+На основе композиции базовых можно построить ещё операции:
+\begin{figure}[H]
+\begin{tabular}{p{0.37\linewidth}p{0.5\linewidth}}
+    \begin{tabular}{p{\linewidth}} Замыкание (closing) \\ 
+                       $ B \bullet S = (B \oplus S) \ominus S $ 
+    \end{tabular} &
+    \begin{tabular}{l}
+        \scaledimg{0.33}{closening_0_initial.png}
+        \scaledimg{0.33}{closeining_1_dilatated.png}
+        \scaledimg{0.33}{closening_2_erosed.png} \\
+    \end{tabular} \\
+    \begin{tabular}{p{\linewidth}} Размыкание / отмыкание \newline (opening) \\
+                       $ B \circ S = (B \ominus S) \oplus S $
+    \end{tabular} &
+    \begin{tabular}{l}
+        \scaledimg{0.33}{opening_0_initial.png}
+        \scaledimg{0.33}{opening_1_erosed.png}
+        \scaledimg{0.33}{opening_2_dilatated.png} \\
+    \end{tabular} \\
+\end{tabular}
+\end{figure}
+В качестве структурирующего элемента использован Box(3,3).
+\end{frame}
+
+
+\begin{frame}[shrink]\frametitle{Соприкасающиеся объекты}
+Разъединение при помощи размыкания:
+\begin{itemize}
+    \item[] 1 -- исходное иозбражение (208 $\times$ 264) \\
+    \item[] 2 -- эрозия с использованием Disk(25)  \\
+    \item[] 3 -- наращивание с использованием Disk(25); объекты разделены \\
+\end{itemize}
+Возможно соединение при помощи замыкания
+\begin{itemize}
+    \item[] 4 -- наращивание с использованием Disk(10) \\
+    \item[] 5 -- эрозия с использованием Disk(10); объекты снова соединились и
+                 изображение стало похоже на исходное (но не тождественно ему) \\
+\end{itemize}
+\begin{figure}[H]
+\begin{tabular}{ lllll }
+    \scaledimg{0.25}{contacting_reverse.png} &
+    \scaledimg{0.25}{contacting_reverse_erosed_25.png} &
+    \scaledimg{0.25}{contacting_reverse_opened_25.png} &
+    \scaledimg{0.25}{contacting_reverse_dilated_10.png} &
+    \scaledimg{0.25}{contacting_reverse_erosed_10.png} \\
+    1 & 2 & 3 & 4 & 5
+\end{tabular}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}\frametitle{Удаление шумов с изображений}
+При помощи замыкания (Box(7,7)) можно удалить шум с изображения, если сигнал несут 
+чёрные пиксели, а шум состоит из белых пикселей (изображение 640 $\times$ 478):
+\begin{figure}[H]
+\begin{tabular}{ ll }
+    \scaledimg{0.25}{noisy_spoon_black.png} &
+    \scaledimg{0.25}{noisy_spoon_black_closed.png}
+\end{tabular}
+\end{figure}
+Размыкание позволяет удалять шум с изображения, если сигнал несут чёрные пикселы 
+и шум также состоит из чёрных пикселей:
+\begin{figure}[H]
+\begin{tabular}{ ll }
+    \scaledimg{0.25}{noisy_spoon_white.png} &
+    \scaledimg{0.25}{noisy_spoon_white_opened.png} \\
+\end{tabular}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}\frametitle{Выделение объектов при помощи размыкания}
+\begin{figure}[H]
+\begin{tabular}{lll}
+    \scaledimg{0.25}{em_misc} &
+    \scaledimg{0.25}{em_misc_bw} &
+    \scaledimg{0.25}{em_nonoise} \\
+    1 & 2 & 3 \\
+    \scaledimg{0.25}{em_misc_result_50} &
+    \scaledimg{0.25}{em_misc_result_100} &
+    \scaledimg{0.25}{em_misc_result_150} \\
+    4 & 5 & 6
+\end{tabular}
+\end{figure}
+1 - исходное изображение (800 $\times$ 609), 2 - бинаризованное, 3 - без шума 
+4 - выделены объекты диаметром более 50, 5 - более 100, 6 - более 150 пикселов
+при помощи Disk(50), Disk(100) и Disk(150) соответственно.
+\end{frame}
+
+
+\begin{frame}\frametitle{Выделение границ}
+Выделение границ выполняется при помощи эрозии с использованием специального 
+структурного элемента (рис. 2: граничные пикселы имеют соседний пиксел, несущий 
+сигнал). После его применения разность исходного 
+изображения и результата эрозии даёт границы объектов.
+\begin{figure}[H]
+\begin{tabular}{ p{0.2\linewidth}p{0.1\linewidth}p{0.2\linewidth}p{0.1\linewidth}
+                 p{0.2\linewidth} }
+    \scaledimg{0.25}{borders_init.png} &
+    \scaledimg{0.1}{borders_el_3.png} &
+    \scaledimg{0.25}{borders_found_3.png} &
+    \scaledimg{0.1}{borders_el_31.png} &
+    \scaledimg{0.25}{borders_found_31.png} \\
+    1 & 2 & 3 & 4 & 5
+\end{tabular}
+\end{figure}
+Исходное изображение (рис. 1) имеет размер 500 $\times$ 500. Минимальный размер 
+структурирующего элемента для поиска границ равен 3 (рис. 2), соответствующий 
+ему результат показан на рис. 3. Если использовать больший размер 
+структурирующего элемента (рис. 4), можно выделять граничную область большей 
+толщины (рис. 5).
+\end{frame}
+
+
+\begin{frame}\frametitle{Выделение границ на реалистичных изображениях}
+\begin{figure}[H]
+\begin{tabular}{ p{0.4\linewidth}p{0.4\linewidth} }
+    \begin{tabular}{ p{\linewidth} }
+        \scaledimg{0.3}{borders_yaoqi.jpg}
+        \captionsetup{labelformat=empty}\caption[]{Исходное}
+    \end{tabular} &
+    \begin{tabular}{ p{\linewidth} }
+        \scaledimg{0.3}{borders_yaoqi_init.png}
+        \captionsetup{labelformat=empty}\caption[]{Бинаризованное}
+    \end{tabular} \\
+    \begin{tabular}{ p{\linewidth} }
+        \scaledimg{0.3}{borders_yaoqi_init_nobn.png}
+        \captionsetup{labelformat=empty}\caption[]{Без шума}
+    \end{tabular} &
+    \begin{tabular}{ p{\linewidth} }
+        \scaledimg{0.3}{borders_yaoqi_found.png}
+        \captionsetup{labelformat=empty}\caption[]{Границы}
+    \end{tabular}
+\end{tabular}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}\frametitle{Условное наращивание}
+\begin{tabular}{p{0.5\linewidth}p{0.5\linewidth}}
+    \begin{tabular}{l}
+        $ B` = ((B \ominus S_1) \oplus S_2) \cap B $
+    \end{tabular} &
+    \begin{tabular}{p{0.075\linewidth}p{0.1\linewidth}p{0.075\linewidth}
+                    p{0.1\linewidth}}
+        \begin{tabular}{l} $S_1$ = \end{tabular} &
+        \begin{tabular}{l} \scaledimg{0.1}{box_31.png} \end{tabular} &
+        \begin{tabular}{l} $S_2$ = \end{tabular} &
+        \begin{tabular}{l} \scaledimg{0.1}{box_33.png} \end{tabular}
+    \end{tabular} \\
+    & \begin{tabular}{p{0.5\linewidth}p{0.5\linewidth}}
+          Box(1,3) & Box(3,3)
+      \end{tabular}
+\end{tabular}
+\begin{figure}[H]
+\begin{tabular}{llll}
+    \scaledimg{0.25}{cond_init.png} &
+    \scaledimg{0.25}{cond_erosed.png} &
+    \scaledimg{0.25}{cond_temp.png} &
+    \scaledimg{0.25}{cond_result.png} \\
+    1 & 2 & 3 & 4
+\end{tabular}
+\end{figure}
+На исходном изображении (рис. 1) присутствуют фигуры разной формы. После эрозии 
+с использованием элемента $S_1$ (результат на рис. 2) и наращивания с элементом 
+$S_2$ получается изображение (рис. 3), в пересечении с исходным дающее картинку 
+(рис. 4), на котором остаются только те фигуры, включающие деталь, 
+соответствующую структурирующему элементу $S_1$.
+\end{frame}
+
+
+% - Нечёткая морфология (Fuzzy)
+% - Мягкая морфология (Soft)
+% - Morphological watershed
+
+
+\begin{frame}\frametitle{Источники}
+\begin{itemize}
+\item[] http://uiip.bas-net.by/structure/l\_is/21-Inyutin\%20(1).pdf
+\item[] http://aishack.in/tutorials/mathematical-morphology
+\end{itemize}
+\end{frame}
+
+\end{document}
